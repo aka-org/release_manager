@@ -7,7 +7,7 @@ git_open_pr() {
 
   if [ -z $DEBUG ]; then
     # Create the PR
-    curl -s -L -X POST "https://api.github.com/repos/$github_repository/pulls" \
+    curl -s --fail --output /dev/null -L -X POST "https://api.github.com/repos/$github_repository/pulls" \
       -H "Authorization: Bearer $cicd_token" \
       -H "Accept: application/vnd.github+json" \
       -d @- <<EOF | jq .
