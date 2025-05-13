@@ -1,3 +1,22 @@
+# Requires env GITHUB_REPOSITORY CICD_TOKEN
+trigger_workflow() {
+  local workflow="$1"
+  local ref="${2:-main}"
+  local cicd_token="$CICD_TOKEN"
+  local github_repository="$GITHUB_REPOSITORY"
+
+  if [ -z $DEBUG ]; then
+    # Trigger the workflow
+    curl -s -L --fail --output /dev/null \
+    -X POST \
+    "https://api.github.com/repos/$github_repository/actions/workflows/$workflow/dispatches" \
+      -H "Accept: application/vnd.github+json" \
+      -H "Authorization: Bearer $cicd_token" \
+      -d '{"ref":"$ref"}' # Specify the branch to trigger
+  fi
+  echo "✅ Trigger workflow $workflow in $github_repository with ref $ref"
+}
+
 git_open_pr() {
   local title="$1"
   local head="$2"
@@ -7,7 +26,9 @@ git_open_pr() {
 
   if [ -z $DEBUG ]; then
     # Create the PR
-    curl -s --fail --output /dev/null -L -X POST "https://api.github.com/repos/$github_repository/pulls" \
+    curl -s -L --fail --output /dev/null \
+    -X POST \
+    "https://api.github.com/repos/$github_repository/pulls" \
       -H "Authorization: Bearer $cicd_token" \
       -H "Accept: application/vnd.github+json" \
       -d @- <<EOF | jq .
